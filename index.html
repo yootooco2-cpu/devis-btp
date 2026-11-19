@@ -4892,7 +4892,10 @@ details > summary { cursor: pointer; }
       etat = { catalogue: cat, devis: S.liste[0].construire(cat) };
     }
     // Profil : celui enregistré sur cet appareil, sinon le profil pré-enregistré de cette version, sinon vide.
-    etat.profil = completer(PROFIL_DEFAUT, s && s.profil ? s.profil : profilPreenregistre());
+    // Un profil déjà rempli sur l'appareil n'est jamais écrasé ; un profil encore vide cède la place à celui du lien.
+    const profilVide = p => !p || (M.vide(p.nom) && !(p.contacts && p.contacts.length));
+    const garderLocal = s && s.profil && !(profilVide(s.profil) && profilDepuisLien());
+    etat.profil = completer(PROFIL_DEFAUT, garderLocal ? s.profil : profilPreenregistre());
     // Le profil du lien est lu une seule fois : on le retire de l'adresse (il est ensuite enregistré sur l'appareil).
     if (RE_PROFIL_LIEN.test(location.hash)) {
       try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { location.hash = ''; }
